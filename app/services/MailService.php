@@ -36,6 +36,8 @@ class MailService
      */
     private static function getPasswordResetTemplate(string $email, string $resetLink, string $token): string
     {
+        $year = date("Y");
+
         return <<<HTML
 <!DOCTYPE html>
 <html>
@@ -63,8 +65,8 @@ class MailService
             <p style="color:#999;font-size:12px">Link expires in 1 hour</p>
         </div>
         <div class="footer">
-  <p>&copy; <?php echo date("Y"); ?> Macerti</p>
-</div>
+            <p>&copy; $year Macerti</p>
+        </div>
     </div>
 </body>
 </html>
