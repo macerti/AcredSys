@@ -11,8 +11,9 @@ class DashboardController
 
     public function index(): void
     {
-        require_auth();
-        $users = $this->users->allWithRoles();
+        require_module_access('dashboard');
+        $organizationId = require_org_context();
+        $users = $this->users->allWithRoles($organizationId);
         require __DIR__ . '/../views/dashboard/index.php';
     }
 }

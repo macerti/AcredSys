@@ -11,7 +11,7 @@ class UserController
 
     public function create(): void
     {
-        require_auth();
+        require_module_access('users');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verify_csrf()) {
             set_flash('error', 'Invalid request.');
@@ -32,25 +32,25 @@ class UserController
         $lastName = 'Account';
 
         $this->users->create($email, password_hash($password, PASSWORD_DEFAULT), $firstName, $lastName);
-        set_flash('success', 'User created successfully.');
+        set_flash('success', 'User created successfully. Assign role(s) in Role Management for this organization.');
         redirect('index.php?page=dashboard');
     }
 
     public function update(): void
     {
-        require_auth();
+        require_module_access('users');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verify_csrf()) {
             set_flash('error', 'Invalid request.');
             redirect('index.php?page=dashboard');
         }
 
-        $id = $_POST['id'] ?? '';
+        $id = (string) ($_POST['id'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $isActive = isset($_POST['is_active']);
         $isVerified = isset($_POST['is_verified']);
 
-        if (!$id || !validate_email($email)) {
+        if ($id === '' || !validate_email($email)) {
             set_flash('error', 'Invalid user input.');
             redirect('index.php?page=dashboard');
         }
@@ -62,15 +62,15 @@ class UserController
 
     public function delete(): void
     {
-        require_auth();
+        require_module_access('users');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verify_csrf()) {
             set_flash('error', 'Invalid request.');
             redirect('index.php?page=dashboard');
         }
 
-        $id = $_POST['id'] ?? '';
-        if (!$id) {
+        $id = (string) ($_POST['id'] ?? '');
+        if ($id === '') {
             set_flash('error', 'Missing user id.');
             redirect('index.php?page=dashboard');
         }

@@ -12,4 +12,22 @@
         <button type="submit">Login</button>
     </form>
 </section>
+
+<?php if (!empty($_SESSION['pending_login_org_ids'])): ?>
+<section class="card">
+    <h3>Select Organization</h3>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()); ?>">
+        <input type="hidden" name="action" value="select-org">
+        <label>Organization
+            <select name="organization_id" required>
+                <?php foreach ($_SESSION['pending_login_org_ids'] as $orgId): ?>
+                    <option value="<?= (int) $orgId; ?>">Organization #<?= (int) $orgId; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <button type="submit">Continue</button>
+    </form>
+</section>
+<?php endif; ?>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
