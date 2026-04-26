@@ -2,13 +2,17 @@
 
 class UserModel
 {
-    public function create(string $email, string $passwordHash): bool
+    public function create(string $email, string $passwordHash, string $firstName, string $lastName, string $preferredLocale = 'en'): bool
     {
-        $sql = 'INSERT INTO users (id, email, password_hash, is_active, is_verified) VALUES (UUID(), :email, :password_hash, 1, 0)';
+        $sql = 'INSERT INTO users (email, password_hash, first_name, last_name, preferred_locale, is_active)
+                VALUES (:email, :password_hash, :first_name, :last_name, :preferred_locale, 1)';
         $stmt = db()->prepare($sql);
         return $stmt->execute([
             ':email' => $email,
             ':password_hash' => $passwordHash,
+            ':first_name' => $firstName,
+            ':last_name' => $lastName,
+            ':preferred_locale' => in_array($preferredLocale, ['en', 'fr'], true) ? $preferredLocale : 'en',
         ]);
     }
 
@@ -30,10 +34,10 @@ class UserModel
 
     public function allWithRoles(): array
     {
-        $sql = 'SELECT u.*, GROUP_CONCAT(r.name ORDER BY r.name SEPARATOR ", ") AS roles
+        $sql = 'SELECT u.*, GROUP_CONCAT(sr.name ORDER BY sr.name SEPARATOR ", ") AS roles
                 FROM users u
-                LEFT JOIN user_roles ur ON ur.user_id = u.id
-                LEFT JOIN roles r ON r.id = ur.role_id
+                LEFT JOIN user_organization_roles uor ON uor.user_id = u.id AND uor.is_active = 1
+                LEFT JOIN system_roles sr ON sr.id = uor.system_role_id
                 GROUP BY u.id
                 ORDER BY u.created_at DESC';
 
@@ -43,7 +47,12 @@ class UserModel
     public function update(string $id, string $email, bool $isActive, bool $isVerified): bool
     {
         $sql = 'UPDATE users
-                SET email = :email, is_active = :is_active, is_verified = :is_verified
+                SET email = :email,
+                    is_active = :is_active,
+                    email_verified_at = CASE
+                        WHEN :is_verified = 1 THEN COALESCE(email_verified_at, NOW())
+                        ELSE NULL
+                    END
                 WHERE id = :id';
 
         $stmt = db()->prepare($sql);
