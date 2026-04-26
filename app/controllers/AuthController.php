@@ -36,15 +36,21 @@ class AuthController
                 redirect('index.php?page=register');
             }
 
-            $this->users->create($email, password_hash($password, PASSWORD_DEFAULT));
+            $namePart = preg_replace('/[^a-zA-Z0-9]/', ' ', (string) strstr($email, '@', true));
+            $namePart = trim((string) $namePart);
+            $firstName = $namePart !== '' ? ucfirst(strtolower(explode(' ', $namePart)[0])) : 'User';
+            $lastName = 'Account';
+
+            $this->users->create($email, password_hash($password, PASSWORD_DEFAULT), $firstName, $lastName);
             $created = $this->users->findByEmail($email);
 
             if ($created) {
                 $allRoles = $this->roles->all();
                 $userRoleId = null;
                 foreach ($allRoles as $role) {
-                    if ($role['name'] === 'user') {
+                    if (in_array($role['name'], ['contributor', 'viewer', 'org_admin'], true)) {
                         $userRoleId = (int) $role['id'];
+                        break;
                     }
                 }
                 if ($userRoleId !== null) {
@@ -78,6 +84,7 @@ class AuthController
 
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_name'] = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
             $_SESSION['roles'] = $this->roles->getRoleNamesForUser($user['id']);
 
             $token = bin2hex(random_bytes(32));

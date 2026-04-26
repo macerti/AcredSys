@@ -4,8 +4,8 @@ class PasswordResetModel
 {
     public function create(string $userId, string $token, string $expiresAt): bool
     {
-        $sql = 'INSERT INTO password_resets (id, user_id, reset_token, expires_at, used)
-                VALUES (UUID(), :user_id, :reset_token, :expires_at, 0)';
+        $sql = 'INSERT INTO password_resets (user_id, reset_token, expires_at, used)
+                VALUES (:user_id, :reset_token, :expires_at, 0)';
 
         $stmt = db()->prepare($sql);
         return $stmt->execute([

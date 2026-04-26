@@ -26,7 +26,12 @@ class UserController
             redirect('index.php?page=dashboard');
         }
 
-        $this->users->create($email, password_hash($password, PASSWORD_DEFAULT));
+        $namePart = preg_replace('/[^a-zA-Z0-9]/', ' ', (string) strstr($email, '@', true));
+        $namePart = trim((string) $namePart);
+        $firstName = $namePart !== '' ? ucfirst(strtolower(explode(' ', $namePart)[0])) : 'User';
+        $lastName = 'Account';
+
+        $this->users->create($email, password_hash($password, PASSWORD_DEFAULT), $firstName, $lastName);
         set_flash('success', 'User created successfully.');
         redirect('index.php?page=dashboard');
     }

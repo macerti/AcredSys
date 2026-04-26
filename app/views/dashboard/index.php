@@ -31,7 +31,7 @@
                 <tr>
                     <td><?= e($user['email']); ?></td>
                     <td><?= (int) $user['is_active'] ? 'Yes' : 'No'; ?></td>
-                    <td><?= (int) $user['is_verified'] ? 'Yes' : 'No'; ?></td>
+                    <td><?= !empty($user['email_verified_at']) ? 'Yes' : 'No'; ?></td>
                     <td><?= e($user['roles'] ?: 'none'); ?></td>
                     <td>
                         <details>
@@ -41,7 +41,7 @@
                                 <input type="hidden" name="id" value="<?= e($user['id']); ?>">
                                 <input type="email" name="email" value="<?= e($user['email']); ?>" required>
                                 <label><input type="checkbox" name="is_active" <?= (int) $user['is_active'] ? 'checked' : ''; ?>> Active</label>
-                                <label><input type="checkbox" name="is_verified" <?= (int) $user['is_verified'] ? 'checked' : ''; ?>> Verified</label>
+                                <label><input type="checkbox" name="is_verified" <?= !empty($user['email_verified_at']) ? 'checked' : ''; ?>> Verified</label>
                                 <button type="submit">Save</button>
                             </form>
                         </details>
