@@ -11,8 +11,8 @@ class ProfileController
 
     public function edit(): void
     {
-        require_auth();
-        $userId = current_user_id();
+        require_module_access('profile');
+        $userId = (string) current_user_id();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!verify_csrf()) {

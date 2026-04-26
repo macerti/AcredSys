@@ -52,6 +52,11 @@ function current_user_id(): ?string
     return $_SESSION['user_id'] ?? null;
 }
 
+function current_organization_id(): ?int
+{
+    return isset($_SESSION['organization_id']) ? (int) $_SESSION['organization_id'] : null;
+}
+
 function is_logged_in(): bool
 {
     return current_user_id() !== null;
@@ -63,6 +68,19 @@ function require_auth(): void
         set_flash('error', 'Please login to continue.');
         redirect('index.php?page=login');
     }
+}
+
+function require_org_context(): int
+{
+    require_auth();
+    $orgId = current_organization_id();
+
+    if ($orgId === null) {
+        set_flash('error', 'Organization context is required. Please sign in again.');
+        redirect('index.php?page=login');
+    }
+
+    return $orgId;
 }
 
 function redirect(string $url): void
@@ -90,4 +108,41 @@ function has_role(string $role): bool
 function validate_email(string $email): bool
 {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function role_capability_map(): array
+{
+    return [
+        'dashboard' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'users' => ['org_admin'],
+        'roles' => ['org_admin'],
+        'profile' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'standards-compliance' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'documents' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'processes' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'risks-issues' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'audits' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'actions' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'objectives' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'management-review' => ['org_admin', 'auditor', 'contributor', 'viewer'],
+        'settings' => ['org_admin'],
+    ];
+}
+
+function can_access_module(string $module): bool
+{
+    $map = role_capability_map();
+    $allowedRoles = $map[$module] ?? [];
+    $roles = $_SESSION['roles'] ?? [];
+
+    return !empty(array_intersect($allowedRoles, $roles));
+}
+
+function require_module_access(string $module): void
+{
+    require_org_context();
+    if (!can_access_module($module)) {
+        set_flash('error', 'You are not authorized to access this section.');
+        redirect('index.php?page=dashboard');
+    }
 }

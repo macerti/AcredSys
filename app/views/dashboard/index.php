@@ -1,5 +1,6 @@
 <?php $title = 'Dashboard'; require __DIR__ . '/../layout/header.php'; ?>
 <section class="card">
+    <p>Active organization: <strong><?= (int) require_org_context(); ?></strong></p>
     <h2>User Management</h2>
     <form method="post" action="index.php?page=user-create" class="grid-form" novalidate>
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()); ?>">

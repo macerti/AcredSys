@@ -1,6 +1,7 @@
 <?php $title = 'Role Management'; require __DIR__ . '/../layout/header.php'; ?>
 <section class="card">
     <h2>Available Roles</h2>
+    <p>Active organization: <strong><?= (int) require_org_context(); ?></strong></p>
     <ul>
         <?php foreach ($roles as $role): ?>
             <li><?= e($role['name']); ?></li>
@@ -13,6 +14,7 @@
     <?php foreach ($users as $user): ?>
         <form method="post" action="index.php?page=roles-update" class="role-form">
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()); ?>">
+            <input type="hidden" name="organization_id" value="<?= (int) require_org_context(); ?>">
             <input type="hidden" name="user_id" value="<?= e($user['id']); ?>">
             <strong><?= e($user['email']); ?></strong>
             <div class="checkbox-group">

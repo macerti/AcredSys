@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-$page = $_GET['page'] ?? 'login';
+$page = $_GET['page'] ?? (is_logged_in() ? 'dashboard' : 'login');
 
 $auth = new AuthController();
 $dashboard = new DashboardController();
 $userCtrl = new UserController();
 $profile = new ProfileController();
 $roles = new RoleController();
+$modules = new ModuleController();
 
 try {
     switch ($page) {
@@ -47,9 +48,20 @@ try {
         case 'user-delete':
             $userCtrl->delete();
             break;
+        case 'standards-compliance':
+        case 'documents':
+        case 'processes':
+        case 'risks-issues':
+        case 'audits':
+        case 'actions':
+        case 'objectives':
+        case 'management-review':
+        case 'settings':
+            $modules->index($page);
+            break;
         default:
             set_flash('error', 'Page not found.');
-            redirect('index.php?page=login');
+            redirect('index.php?page=' . (is_logged_in() ? 'dashboard' : 'login'));
     }
 } catch (Throwable $e) {
     http_response_code(500);

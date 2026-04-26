@@ -32,16 +32,18 @@ class UserModel
         return $row ?: null;
     }
 
-    public function allWithRoles(): array
+    public function allWithRoles(int $organizationId): array
     {
         $sql = 'SELECT u.*, GROUP_CONCAT(sr.name ORDER BY sr.name SEPARATOR ", ") AS roles
                 FROM users u
-                LEFT JOIN user_organization_roles uor ON uor.user_id = u.id AND uor.is_active = 1
+                JOIN user_organization_roles uor ON uor.user_id = u.id AND uor.organization_id = :organization_id AND uor.is_active = 1
                 LEFT JOIN system_roles sr ON sr.id = uor.system_role_id
                 GROUP BY u.id
                 ORDER BY u.created_at DESC';
 
-        return db()->query($sql)->fetchAll();
+        $stmt = db()->prepare($sql);
+        $stmt->execute([':organization_id' => $organizationId]);
+        return $stmt->fetchAll();
     }
 
     public function update(string $id, string $email, bool $isActive, bool $isVerified): bool
